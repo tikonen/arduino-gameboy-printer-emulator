@@ -36,8 +36,8 @@ WebUSB WebUSBSerial(1, "herrzatacke.github.io/gb-printer-web/#/webusb");
 #define GBP_OUTPUT_RAW_PACKETS     true   // by default, packets are parsed. if enabled, output will change to raw data packets for parsing and decompressing later
 #define GBP_USE_PARSE_DECOMPRESSOR false  // embedded decompressor can be enabled for use with parse mode but it requires fast hardware (SAMD21, SAMD51, ESP8266, ESP32)
 
-#include <stdint.h>  // uint8_t
-#include <stddef.h>  // size_t
+#include <stdint.h>                       // uint8_t
+#include <stddef.h>                       // size_t
 
 #include "gameboy_printer_protocol.h"
 #include "gbp_serial_io.h"
@@ -85,7 +85,7 @@ WebUSB WebUSBSerial(1, "herrzatacke.github.io/gb-printer-web/#/webusb");
 #define GBP_SD_PIN                // Pin 4            : Serial Data  (Unused)
 #define GBP_SC_PIN        2       // Pin 5            : Serial Clock (Interrupt)
 #define GBP_GND_PIN               // Pin 6            : GND (Attach to GND Pin)
-#define LED_STATUS_PIN   13       // Internal LED blink on packet reception
+#define LED_STATUS_PIN    6       // LED blink on packet reception
 #endif
 // clang-format on
 
@@ -183,6 +183,8 @@ void setup(void)
 
   /* LED Indicator */
   pinMode(LED_STATUS_PIN, OUTPUT);
+  digitalWrite(LED_STATUS_PIN, HIGH);
+  delay(200);
   digitalWrite(LED_STATUS_PIN, LOW);
 
   /* Setup */
@@ -477,7 +479,7 @@ void Connect_to_printer()
       status = junk;
     }
   }
-  if (status == 0X81)  //Printer connected !
+  if (status == 0X81)                //Printer connected !
   {
     digitalWrite(GBP_SC_PIN, HIGH);  //acts like a real Game Boy
     digitalWrite(GBP_SI_PIN, LOW);   //acts like a real Game Boy
@@ -513,15 +515,15 @@ char printing(char byte_sent)  // this function prints bytes to the serial
   {
     bit_sent = bitRead(byte_sent, 7 - i);
     digitalWrite(GBP_SC_PIN, LOW);
-    digitalWrite(GBP_SI_PIN, bit_sent);  //GBP_SI_PIN is SOUT for the printer
+    digitalWrite(GBP_SI_PIN, bit_sent);    //GBP_SI_PIN is SOUT for the printer
     digitalWrite(LED_STATUS_PIN, bit_sent);
-    delayMicroseconds(30);  //double speed mode
+    delayMicroseconds(30);                 //double speed mode
     digitalWrite(GBP_SC_PIN, HIGH);
     bit_read = (digitalRead(GBP_SO_PIN));  //GBP_SO_PIN is SIN for the printer
     bitWrite(byte_read, 7 - i, bit_read);
-    delayMicroseconds(30);  //double speed mode
+    delayMicroseconds(30);                 //double speed mode
   }
-  delayMicroseconds(0);  //optionnal delay between bytes, may be less than 1490 µs
+  delayMicroseconds(0);                    //optionnal delay between bytes, may be less than 1490 µs
   //  Serial.println(byte_sent, HEX);
   //  Serial.println(byte_read, HEX);
   return byte_read;
